@@ -96,115 +96,137 @@ elif(app_mode=="About"):
     st.write("Here's the distribution of millet crops in India:")
     display_map(selected_millet)
 
-#Prediction Page
-elif(app_mode=="Prediction"):
+## Prediction Page
+if app_mode == "Prediction":
     st.header("Model Prediction")
-    test_image=st.file_uploader("Choose an Image:")
-    #show button
-    if(st.button("Show Image")):
+    test_image = st.file_uploader("Choose an Image:")
+    
+    # Show button
+    if st.button("Show Image"):
         if test_image is not None:
-            st.image(test_image, use_column_width=True)
+            if not test_image.name.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                st.error("Please upload an image with JPG, JPEG, PNG, or WEBP format.")
+            else:
+                st.image(test_image, width=400)
         else:
             st.error("Please upload an image first.")
 
-    #Predict button
-    if(st.button("Predict")):
+    # Predict button
+    if st.button("Predict"):
         if test_image is not None:
-            st.write("Our Prediction")
-            result_index = model_prediction(test_image)   
-            # Reading Labels
-            with open("labels.txt") as f:
-                content = f.readlines()
-            labels = [i.strip() for i in content]
-            predicted_millet = labels[result_index]
-            print(predicted_millet)         # printing the predicted millet
+            # Check file extension
+            if not test_image.name.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                st.error("Please upload an image with JPG, JPEG, PNG, or WEBP format.")
+            else:
+                st.write("Our Prediction")
+                result_index = model_prediction(test_image)
+                
+                # Reading Labels
+                with open("labels.txt") as f:
+                    content = f.readlines()
+                label = [i.strip() for i in content]
+                predicted_millet = label[result_index]
+                print(predicted_millet)         # printing the predicted millet
+                # Load millet information from CSV file
+                df = load_data("millets_information.csv")
+                print(df)
 
-            # Load millet information from CSV file
-            df = load_data("millets_information.csv")
-            print(df)
+
+                predicted_millet_info = df[df['Millet_Name'] == predicted_millet].squeeze()
+                print(predicted_millet_info)
+                st.success("The above image is of {}".format(predicted_millet_info['Name']))
+
+                            
+
+                # Display millet information
+                st.subheader("Millet Information")
+                st.write("**Name:**", predicted_millet_info['Name'])
+                st.write("**Introduction:**", predicted_millet_info['Introduction'])
+                st.write("**Botanical Name:**", predicted_millet_info['Botanical Name'])
+                st.write("**Common Names:**", predicted_millet_info['Common Names'])
+                st.write("**Cultivation Areas:**", predicted_millet_info['Cultivation Areas'])
+                st.write("**Appearance:**", predicted_millet_info['Appearance'])
+
+                # Display benefits in a list format
+                st.subheader("Benefits")
+                benefits = predicted_millet_info['Benefits'].split('*')
+                for benefit in benefits:
+                    st.write(f"- {benefit.strip()}")
 
 
-            predicted_millet_info = df[df['Millet_Name'] == predicted_millet].squeeze()
-            print(predicted_millet_info)
-            st.success("The above image is of {}".format(predicted_millet_info['Name']))
 
+                # Display nutritional values as a doughnut chart
+                st.subheader("Nutritional Value:")
+                st.write("Per 100g of", predicted_millet_info['Name'],":")
+                nutrients = ['Energy(kcal)', 'Carbohydrates(g)', 'Protein(g)', 'Fat(g)',  'Fiber(g)'] # Add more if needed
+                nutrient_values = [float(predicted_millet_info[nutrient]) for nutrient in nutrients]  # Convert to int
 
-            # Display millet information
-            st.subheader("Millet Information")
-            st.write("**Name:**", predicted_millet_info['Name'])
-            st.write("**Introduction:**", predicted_millet_info['Introduction'])
-            st.write("**Botanical Name:**", predicted_millet_info['Botanical Name'])
-            st.write("**Common Names:**", predicted_millet_info['Common Names'])
-            st.write("**Cultivation Areas:**", predicted_millet_info['Cultivation Areas'])
-            st.write("**Appearance:**", predicted_millet_info['Appearance'])
+                nutritional_options = {
+                    "tooltip": {"trigger": "item"},
+                    "legend": {"top": "5%", "left": "center"},
+                    "series": [
+                        {
+                            "name": "Nutritional Values",
+                            "type": "pie",
+                            "radius": ["40%", "70%"],
+                            "color": ["#023047", "#219EBC", "#8ECAE6","#FFB703","#FB8500"],
 
-            # Display nutritional values as a doughnut chart
-            st.subheader("Nutritional Value:")
-            st.write("Per 100g of", predicted_millet_info['Name'],":")
-            nutrients = ['Energy(kcal)', 'Carbohydrates(g)', 'Protein(g)', 'Fat(g)',  'Fiber(g)'] # Add more if needed
-            nutrient_values = [float(predicted_millet_info[nutrient]) for nutrient in nutrients]  # Convert to int
+                            "avoidLabelOverlap": False,
+                            "itemStyle": {
+                                "borderRadius": 10,
+                                "borderColor": "#fff",
+                                "borderWidth": 2,
+                            },
+                            "label": {"show": False, "position": "center"},
+                            "emphasis": {
+                                "label": {"show": True, "fontSize": "16", "fontWeight": "bold"}
+                            },
+                            "labelLine": {"show": False},
+                            "data": [
+                                {"value": value, "name": nutrient}
+                                for nutrient, value in zip(nutrients, nutrient_values)
+                            ],
+                        }
+                    ],
+                }
+                st_echarts(options=nutritional_options, height="500px")
 
-            nutritional_options = {
-                "tooltip": {"trigger": "item"},
-                "legend": {"top": "5%", "left": "center"},
-                "series": [
-                    {
-                        "name": "Nutritional Values",
-                        "type": "pie",
-                        "radius": ["40%", "70%"],
-                        "avoidLabelOverlap": False,
-                        "itemStyle": {
-                            "borderRadius": 10,
-                            "borderColor": "#fff",
-                            "borderWidth": 2,
-                        },
-                        "label": {"show": False, "position": "center"},
-                        "emphasis": {
-                            "label": {"show": True, "fontSize": "16", "fontWeight": "bold"}
-                        },
-                        "labelLine": {"show": False},
-                        "data": [
-                            {"value": value, "name": nutrient}
-                            for nutrient, value in zip(nutrients, nutrient_values)
-                        ],
-                    }
-                ],
-            }
-            st_echarts(options=nutritional_options, height="500px")
-
-            st.subheader("Mineral Values:")
-            minerals = ['Calcium(mg)', 'Iron(mg)', 'Pottasium(mg)', 'Magnesium(mg)',  'Zinc(mg)'] # Add more if needed
-            mineral_values = [float(predicted_millet_info[mineral]) for mineral in minerals]  # Convert to int
-            mineral_options = {
-                "tooltip": {"trigger": "item"},
-                "legend": {"top": "5%", "left": "center"},
-                "series": [
-                    {
-                        "name": "Mineral Values",
-                        "type": "pie",
-                        "radius": ["40%", "70%"],
-                        "avoidLabelOverlap": False,
-                        "itemStyle": {
-                            "borderRadius": 10,
-                            "borderColor": "#fff",
-                            "borderWidth": 2,
-                        },
-                        "label": {"show": False, "position": "center"},
-                        "emphasis": {
-                            "label": {"show": True, "fontSize": "16", "fontWeight": "bold"}
-                        },
-                        "labelLine": {"show": False},
-                        "data": [
-                            {"value": value, "name": mineral}
-                            for mineral, value in zip(minerals, mineral_values)
-                        ],
-                    }
-                ],
-            }
-            st_echarts(options=mineral_options, height="500px")
-
+                st.subheader("Mineral Values:")
+                minerals = ['Calcium(mg)', 'Iron(mg)', 'Pottasium(mg)', 'Magnesium(mg)', 'Zinc(mg)'] # Add more if needed
+                mineral_values = [float(predicted_millet_info[mineral]) for mineral in minerals]  # Convert to int
+                mineral_options = {
+                    "tooltip": {"trigger": "item"},
+                    "legend": {"top": "5%", "left": "center"},
+                    "series": [
+                        {
+                            "name": "Mineral Values",
+                            "type": "pie",
+                            "radius": ["40%", "70%"],
+                            "color": ["#DAF7A6", "#FFC300", "#FF5733","#C70039","#900C3F"],
+                            "avoidLabelOverlap": False,
+                            "itemStyle": {
+                                "borderRadius": 10,
+                                "borderColor": "#fff",
+                                "borderWidth": 2,
+                            },
+                            "label": {"show": False, "position": "center"},
+                            "emphasis": {
+                                "label": {"show": True, "fontSize": "16", "fontWeight": "bold"}
+                            },
+                            "labelLine": {"show": False},
+                            "data": [
+                                {"value": value, "name": mineral}
+                                for mineral, value in zip(minerals, mineral_values)
+                            ],
+                        }
+                    ],
+                }
+                st_echarts(options=mineral_options, height="500px")
+                
+                
         else:
             st.error("Please upload an image before making a prediction.")
+
 
 
             

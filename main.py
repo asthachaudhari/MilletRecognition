@@ -16,7 +16,9 @@ def load_lottiefile(filepath: str):
     with open(filepath, "r") as f:
         return json.load(f)
     
-lottie_coding = load_lottiefile("homepage.json")#downloaded json file as argument
+lottie_coding = load_lottiefile("homepage.json")
+lottie_about = load_lottiefile("about.json")
+lottie_error = load_lottiefile("error.json")#downloaded json file as argument
 
 # Function to display the map
 millet_regions = {
@@ -113,7 +115,19 @@ if(app_mode=="Home"):
 #About Page
 if(app_mode=="About"):
     selected_millet = st.sidebar.selectbox("Select Millet Type", list(millet_regions.keys()))
-    st.header("About")
+    # st.header("About")
+    st_lottie(
+                            lottie_about,
+
+                            speed=1.5,
+                            reverse=False,
+                            loop=True,
+                            quality="low",
+                            # renderer="svg",
+                            height=None,
+                            width=None,
+                            key=None,
+    )
     st.write("This is an application to predict millet types.")
     st.write("Here's the distribution of millet crops in India:")
     display_map(selected_millet)
@@ -128,10 +142,34 @@ if app_mode == "Prediction":
         if test_image is not None:
             if not test_image.name.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
                 st.error("Please upload an image with JPG, JPEG, PNG, or WEBP format.")
+                st_lottie(
+                            lottie_error,
+
+                            speed=1.5,
+                            reverse=False,
+                            loop=True,
+                            quality="low",
+                            # renderer="svg",
+                            height=None,
+                            width=None,
+                            key=None,
+                )
             else:
                 st.image(test_image, width=400)
         else:
             st.error("Please upload an image first.")
+            st_lottie(
+                            lottie_error,
+
+                            speed=1.5,
+                            reverse=False,
+                            loop=True,
+                            quality="low",
+                            # renderer="svg",
+                            height=None,
+                            width=None,
+                            key=None,
+                )
 
     # Predict button
     if st.button("Predict"):
@@ -139,6 +177,18 @@ if app_mode == "Prediction":
             # Check file extension
             if not test_image.name.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
                 st.error("Please upload an image with JPG, JPEG, PNG, or WEBP format.")
+                st_lottie(
+                            lottie_error,
+
+                            speed=1.5,
+                            reverse=False,
+                            loop=True,
+                            quality="low",
+                            # renderer="svg",
+                            height=None,
+                            width=None,
+                            key=None,
+                )
             else:
                 st.write("Our Prediction")
                 result_index = model_prediction(test_image)
@@ -261,6 +311,18 @@ if app_mode == "Prediction":
                 
         else:
             st.error("Please upload an image before making a prediction.")
+            st_lottie(
+                            lottie_error,
+
+                            speed=1.5,
+                            reverse=False,
+                            loop=True,
+                            quality="low",
+                            # renderer="svg",
+                            height=None,
+                            width=None,
+                            key=None,
+                )
 # Recipes Page
 elif app_mode == "Recipes":
     st.header("Millet Recipes")

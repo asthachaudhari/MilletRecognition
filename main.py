@@ -6,6 +6,17 @@ import plotly.express as px  # Import Plotly Express library
 from streamlit_echarts import st_echarts
 import folium
 from streamlit_folium import folium_static
+#added for animation
+import json
+import requests
+from streamlit_lottie import st_lottie
+
+#function for loading animation
+def load_lottiefile(filepath: str):
+    with open(filepath, "r") as f:
+        return json.load(f)
+    
+lottie_coding = load_lottiefile("homepage.json")#downloaded json file as argument
 
 # Function to display the map
 millet_regions = {
@@ -81,6 +92,18 @@ app_mode= st.sidebar.selectbox("Select page",["Home","About","Prediction","Recip
 
 #Home Page
 if(app_mode=="Home"):
+    st_lottie(
+    lottie_coding,
+
+    speed=1.5,
+    reverse=False,
+    loop=True,
+    quality="low",
+    # renderer="svg",
+    height=None,
+    width=None,
+    key=None,
+)
     st.header("MILLETS RECOGNITION SYSTEM")
     container = st.container()
     container.write("In 2023, the world celebrated Millets Year, and now we're introducing our new image recognition system which aims to raise awareness about the importance of incorporating millets into our diets. By using machine learning, it helps identify different types of millets and provides essential nutritional information about millets, empowering people to make informed dietary choices. ")

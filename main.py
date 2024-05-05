@@ -150,8 +150,8 @@ if app_mode == "Prediction":
                             loop=True,
                             quality="low",
                             # renderer="svg",
-                            height=None,
-                            width=None,
+                            height=200,
+                            width=200,
                             key=None,
                 )
             else:
@@ -166,8 +166,8 @@ if app_mode == "Prediction":
                             loop=True,
                             quality="low",
                             # renderer="svg",
-                            height=None,
-                            width=None,
+                            height=200,
+                            width=200,
                             key=None,
                 )
 
@@ -185,8 +185,8 @@ if app_mode == "Prediction":
                             loop=True,
                             quality="low",
                             # renderer="svg",
-                            height=None,
-                            width=None,
+                            height=200,
+                            width=200,
                             key=None,
                 )
             else:
@@ -319,8 +319,8 @@ if app_mode == "Prediction":
                             loop=True,
                             quality="low",
                             # renderer="svg",
-                            height=None,
-                            width=None,
+                            height=200,
+                            width=200,
                             key=None,
                 )
 # Recipes Page
